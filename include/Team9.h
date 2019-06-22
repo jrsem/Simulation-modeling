@@ -21,6 +21,13 @@ private:
   double _variance;
   double _stdDeviation;
   double _variationCoef;
+  double _halfWidthConfidenceInterval;
+  double _newSampleSize;
+  double _quantile;
+  double _quartil;
+  double _decil;
+  double _centil;
+  unsigned short _histogramNumClasses;
   //double
   bool _minReady = false;
   bool _maxReady = false;
@@ -31,6 +38,7 @@ private:
   bool _stddevReady = false;
   bool _varianceReady = false;
   bool cVReady = false;
+  bool _histoNumClassesReady = false;
 
 public:
   Team9();
@@ -43,6 +51,7 @@ public:
   unsigned short histogramNumClasses();
   double max();
   double mediane();
+  double mediane_bkp();
   double min();
   double mode();
   unsigned int newSampleSize(double confidencelevel, double halfWidth);
@@ -53,6 +62,7 @@ public:
   double variationCoef();
   map<double,double> zScore;
   void populateZCriticalValues();
+  double quantile(unsigned short num, unsigned short subsets);
   //===
   // int read_file();
   void showlist(list<double> data);
