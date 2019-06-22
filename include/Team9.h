@@ -27,7 +27,10 @@ private:
   double _quartil;
   double _decil;
   double _centil;
-  unsigned short _histogramNumClasses;
+  unsigned short _histogramNumClasses = 0;
+  double _histogramClassLowerLimit;
+  double _amplitude;
+  unsigned int _histogramClassFrequency;
   //double
   bool _minReady = false;
   bool _maxReady = false;
@@ -39,6 +42,8 @@ private:
   bool _varianceReady = false;
   bool cVReady = false;
   bool _histoNumClassesReady = false;
+  bool histoCLLReady = false;
+  bool _amplitudeReady = false;
 
 public:
   Team9();
@@ -63,10 +68,16 @@ public:
   map<double,double> zScore;
   void populateZCriticalValues();
   double quantile(unsigned short num, unsigned short subsets);
+  map<unsigned short, double> mapClassLowerLimit;
+  map<unsigned short, double> mapQuartilCalculated;
+  map<unsigned short, double> mapDecilCalculated;
+  map<unsigned short, double> mapCentilCalculated;
+  map<double, double> mapConfidenceHalfWidthCalculated;
+  map<unsigned short, unsigned int> mapClassFrequency;
+  double getClassAmplitude();
   //===
   // int read_file();
   void showlist(list<double> data);
-  void splitList();
   void sortList();
   unsigned int numElements();
   void showlist();
