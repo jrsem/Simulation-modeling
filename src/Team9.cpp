@@ -22,6 +22,7 @@ using namespace std;
 
 Team9::Team9()
 {
+    //Inicializa Tabela com valores de Z.
   populateZCriticalValues();
   
   read_file();
@@ -34,7 +35,7 @@ void Team9::read_file()
   double convert_Number;
   ifstream myfile;
   try{
-    myfile.open("./data/data.txt");
+    myfile.open("./data/dataTest.txt");
     if (myfile.is_open())
     {
       while (myfile.eof() == false)
@@ -48,11 +49,11 @@ void Team9::read_file()
       cout << "Error opening file\n";
   }
   catch(int e){
-        cout << "Error nro "<<e<<endl;;
+        cout << "Error nro "<<e<<endl;
         throw;
   }
   
-  //TODO NEW SAMPLE, RESET ALL
+  // NEW SAMPLE, RESET ALL
   _minReady = false;
   _maxReady = false;
   _avgReady = false;
@@ -182,7 +183,7 @@ double Team9::variance()
         {
           _variance += (item - avg) * (item - avg);
         }
-        _variance /= _numElements;
+        _variance /= _numElements-1;
         //sd = sqrt(var); //desvio padrão
         cout << "variancia:" << _variance << endl;
         //cout << "desvio padrão" << sd << endl;
