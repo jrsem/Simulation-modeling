@@ -13,10 +13,6 @@
 
 #include "Team9.h"
 
-/*
-https://www.geeksforgeeks.org/list-cpp-stl/
-https://pt.cppreference.com/w/cpp/container/list
-*/
 //#include "Team-9.h"
 #include <numeric>   //accumulate()
 #include <algorithm> //max_element()
@@ -35,25 +31,45 @@ Team9::Team9()
 
 void Team9::read_file()
 {
-  list<double>::iterator it;
-  string line;
   double convert_Number;
   ifstream myfile;
-  //TODO TRY CaTCH
-  myfile.open("./data/data.txt");
-  if (myfile.is_open())
-  {
-    while (myfile.eof() == false)
+  try{
+    myfile.open("./data/data.txt");
+    if (myfile.is_open())
     {
-      myfile >> convert_Number;
-      this->sample.push_back(convert_Number);
-    }
+      while (myfile.eof() == false)
+      {
+        myfile >> convert_Number;
+        this->sample.push_back(convert_Number);
+      }
     myfile.close();
+    }
+    else
+      cout << "Error opening file\n";
   }
-  else
-    cout << "Error opening file\n";
-
+  catch(int e){
+        cout << "Error nro "<<e<<endl;;
+        throw;
+  }
+  
   //TODO NEW SAMPLE, RESET ALL
+  _minReady = false;
+  _maxReady = false;
+  _avgReady = false;
+  _medianeReady = false;
+  _modeReady = false;
+  _sampleSorted = false;
+  _stddevReady = false;
+  _varianceReady = false;
+  cVReady = false;
+  _histoNumClassesReady = false;
+  histoCLLReady = false;
+  
+  mapClassLowerLimit.clear();
+  mapQuartilCalculated.clear();
+  mapDecilCalculated.clear();
+  mapCentilCalculated.clear();
+  mapConfidenceHalfWidthCalculated.clear();
 }
 
 
@@ -138,7 +154,7 @@ double Team9::mode()
     if(!_modeReady){
         std::map<double, double> mydict = {};
         double cnt = 0;
-        double itm = 0; // in Python you made this a string '', which seems like a bug
+        double itm = 0; // 
 
         for (auto &&item : sample)
         {
@@ -192,7 +208,17 @@ double Team9::variationCoef(){
     return _variationCoef;
 };
 double Team9::halfWidthConfidenceInterval(double confidencelevel){
-    _halfWidthConfidenceInterval = zScore[confidencelevel] * Team9::stddeviation() / sqrt(Team9::numElements());
+    if(mapConfidenceHalfWidthCalculated[confidencelevel]==0){     
+        double z = zScore[confidencelevel];
+        if(z==0)
+            throw("Confidence Interval not available.");
+ 
+        _halfWidthConfidenceInterval = z * Team9::stddeviation() / sqrt(Team9::numElements());
+        mapConfidenceHalfWidthCalculated.insert(pair<double,double> (confidencelevel,_halfWidthConfidenceInterval));
+    }
+    else
+        _halfWidthConfidenceInterval = mapConfidenceHalfWidthCalculated[confidencelevel];
+    //cout<<"Z= "<<zScore[confidencelevel]<<endl;
     return _halfWidthConfidenceInterval;
 };
 unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
@@ -204,15 +230,41 @@ unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
 };
 
 double Team9::quartil(unsigned short num){
-    _quartil = Team9::quantile(num, 4);
+    if(num<1 || num>3)
+     throw invalid_argument("Quartil value must be between 1 and 3.");
+    //verifica se ja foi calculado, se não, insere no map.
+    if(mapQuartilCalculated[num]==0){
+        _quartil = Team9::quantile(num, 4);
+        mapQuartilCalculated.insert(pair<unsigned short, double>(num, _quartil));
+    }
+    else
+       _quartil = mapQuartilCalculated[num]; 
     return _quartil;
 };
 double Team9::decil(unsigned short num){
-    _decil = Team9::quantile(num, 10);
+     if(num<1 || num>10)
+        throw invalid_argument("Decil value must be between 1 and 10.");
+     //verifica se ja foi calculado, se não, insere no map.
+    if(mapDecilCalculated[num]==0){
+        _decil = Team9::quantile(num, 10);
+        mapDecilCalculated.insert(pair<unsigned short, double>(num, _decil));
+    }
+    else
+       _decil = mapDecilCalculated[num]; 
+    
     return _decil;
 };
 double Team9::centil(unsigned short num){
-    _centil = Team9::quantile(num, 100);
+     if(num<1 || num>100)
+        throw invalid_argument("Centil value must be between 1 and 100.");
+     //verifica se ja foi calculado, se não, insere no map.
+    if(mapCentilCalculated[num]==0){
+        _centil = Team9::quantile(num, 100);
+        mapCentilCalculated.insert(pair<unsigned short, double>(num, _centil));
+    }
+    else
+       _centil = mapCentilCalculated[num]; 
+    
     return _centil;
 };
 
@@ -241,7 +293,9 @@ double Team9::quantile(unsigned short num, unsigned short subsets){
 
 void Team9::setHistogramNumClasses(unsigned short num){
     _histogramNumClasses = num;
-    
+    //Novo numero de classes setado, valores calculador anteriormente não servem mais.
+    mapClassLowerLimit.clear();
+    _amplitudeReady = false;
 };
 unsigned short Team9::histogramNumClasses(){
      if(!_histoNumClassesReady){
@@ -256,22 +310,56 @@ unsigned short Team9::histogramNumClasses(){
     return _histogramNumClasses;
 };
 // 
-// unsigned int Team9::histogramClassFrequency(unsigned short classNum){};
-// double Team9::histogramClassLowerLimit(unsigned short classNum){};
 
+double Team9::getClassAmplitude(){
+    if(!_amplitudeReady){
+        if(_histogramNumClasses==0)
+                 //Se o numero de classes nao foi definido manualmente, faz o calculo
+                 _histogramNumClasses = Team9::histogramNumClasses();
 
-//===
-/*
-data.push_back(i * 2); 
-data.push_front(i * 3); 
-
-data.front();  
-data.back(); 
-
-showlist(data); 
-*/
-
-//print the STL list
+        double minValue = Team9::min();
+        double maxValue = Team9::max();
+        _amplitude = ceil((maxValue-minValue)/_histogramNumClasses);
+        _amplitudeReady = true;
+    }
+    
+    return _amplitude;
+}
+ double Team9::histogramClassLowerLimit(unsigned short classNum){
+     if(mapClassLowerLimit.count(classNum)==0){//verifica se já foi calculado antes
+         
+         
+         _histogramClassLowerLimit = Team9::min() + classNum* Team9::getClassAmplitude();
+         mapClassLowerLimit.insert( pair<unsigned short,double>(classNum, _histogramClassLowerLimit) );
+          cout << "calculou Lower Limit: " <<_histogramClassLowerLimit <<" da clase " <<classNum<< endl;
+  
+     }
+     else{
+         _histogramClassLowerLimit = mapClassLowerLimit[classNum];
+         cout << "recuperou Lower Limit: " <<_histogramClassLowerLimit <<" da clase " <<classNum<< endl;
+     }
+       return _histogramClassLowerLimit;
+ };
+unsigned int Team9::histogramClassFrequency(unsigned short classNum){
+     if(mapClassFrequency.count(classNum)==0){//verifica se já foi calculado antes
+         double lowerLimit = Team9::histogramClassLowerLimit(classNum);
+         double upperLimit = lowerLimit + Team9::getClassAmplitude();
+         unsigned int frequency = 0;
+         for (auto &&value : sample){
+             if(value >= lowerLimit && value < upperLimit )
+                 frequency++;
+         }
+        
+         _histogramClassFrequency = frequency;
+         mapClassFrequency.insert( pair<unsigned short,unsigned int>(classNum, _histogramClassFrequency) );
+       
+     }
+     else{
+         _histogramClassFrequency = mapClassFrequency[classNum];
+        
+     }
+     return _histogramClassFrequency;
+};
 void Team9::showlist()
 {
   for (auto &&item : sample)
@@ -285,35 +373,17 @@ void Team9::sortList()
   sample.sort();
 };
 
-void Team9::splitList()
-{
-    //TODO Chamar funções e não as variaveis
-  list<double>::iterator right = next(sample.begin(), ((_numElements / 2)) - 1);
-  list<double>::iterator left = next(sample.begin(), ((_numElements / 2)));
-  int i, j, limit, pos = 0;
-  double Q2;
-  list<double> auxList = {};
-  list<double>::iterator ptr;
-  //Q2
-  Q2 = _mediane;
-
-  //the list is par
-  limit = (int)(_numElements / 2);
-  for (i = 0; i < limit; i++)
-  {
-    ptr = next(sample.begin(), i);
-    auxList.push_front(*ptr);
-  }
-  classes.push_front(auxList);
-
-  //point ptr to limit posistion in the data
-
-  for (auto &&item : auxList)
-    cout << '\t' << item;
-  cout << '\n';
-}; 
 void Team9::populateZCriticalValues(){
-    zScore.insert( pair<double, double>(0.05, 1.96) );
+    zScore.insert( pair<double, double>(0.70, 1.04) );
+    zScore.insert( pair<double, double>(0.75, 1.15) );
+    zScore.insert( pair<double, double>(0.80, 1.28) );
+    zScore.insert( pair<double, double>(0.85, 1.44) );
+    zScore.insert( pair<double, double>(0.90, 1.645) );
+    zScore.insert( pair<double, double>(0.92, 1.75) );
+    zScore.insert( pair<double, double>(0.95, 1.96) );
+    zScore.insert( pair<double, double>(0.96, 2.05) );
+    zScore.insert( pair<double, double>(0.98, 2.33) );
+    zScore.insert( pair<double, double>(0.99, 2.58) );
 }
 //===
 
