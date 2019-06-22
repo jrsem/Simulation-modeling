@@ -96,7 +96,7 @@ double Team9::min()
     return _min;
 };
 
-double Team9::mediane()
+double Team9::mediane_bkp()
 {
     if(!_medianeReady){
         
@@ -125,6 +125,14 @@ double Team9::mediane()
     return _mediane;
 };
 
+double Team9::mediane()
+{
+    if(!_medianeReady){
+        _mediane = Team9::quantile(1,2);
+        _medianeReady = true;
+    }
+    return _mediane;
+};
 double Team9::mode()
 {
     if(!_modeReady){
@@ -183,20 +191,74 @@ double Team9::variationCoef(){
     }
     return _variationCoef;
 };
+double Team9::halfWidthConfidenceInterval(double confidencelevel){
+    _halfWidthConfidenceInterval = zScore[confidencelevel] * Team9::stddeviation() / sqrt(Team9::numElements());
+    return _halfWidthConfidenceInterval;
+};
+unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
+    double z2 = pow(zScore[confidencelevel],2);
+    double hW2 = pow(halfWidth,2);
+    _newSampleSize = z2 * Team9::variance() / hW2;
+    
+    return _newSampleSize;
+};
 
-//double Team9::centil(unsigned short num){};
+double Team9::quartil(unsigned short num){
+    _quartil = Team9::quantile(num, 4);
+    return _quartil;
+};
+double Team9::decil(unsigned short num){
+    _decil = Team9::quantile(num, 10);
+    return _decil;
+};
+double Team9::centil(unsigned short num){
+    _centil = Team9::quantile(num, 100);
+    return _centil;
+};
 
-//==================
+double Team9::quantile(unsigned short num, unsigned short subsets){
+     if(!_sampleSorted)
+            Team9::sortList();
+     
+    double n = Team9::numElements();
+    double position =  num * (n+1)/ subsets;
+    double integ;
+    double fraction;
+    fraction = modf(position, &integ);
+    list<double>::iterator pos = next(sample.begin(), integ-1);
+    if(fraction > 0){
+        //fracionario, fazer interpolacao
+         
+         list<double>::iterator posAfter = next(sample.begin(), integ);
+         _quantile = (*pos + *posAfter)/2;
+    }
+    else{
+        _quantile = *pos;
+    }
+    cout<<"quantile:"<<_quantile<<endl;
+    return _quantile;
+}
 
-// double Team9::decil(unsigned short num){};
-// double Team9::halfWidthConfidenceInterval(double confidencelevel){};
+void Team9::setHistogramNumClasses(unsigned short num){
+    _histogramNumClasses = num;
+    
+};
+unsigned short Team9::histogramNumClasses(){
+     if(!_histoNumClassesReady){
+         double n = Team9::numElements();
+         if(n<=25)
+             _histogramNumClasses = 5;
+         else
+            //regra de Sturges para o nro de classes
+            _histogramNumClasses = round(1 + 3.32*log10(n));
+        _histoNumClassesReady = true;
+    }
+    return _histogramNumClasses;
+};
+// 
 // unsigned int Team9::histogramClassFrequency(unsigned short classNum){};
 // double Team9::histogramClassLowerLimit(unsigned short classNum){};
-// unsigned short Team9::histogramNumClasses(){};
 
-// unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){};
-// double Team9::quartil(unsigned short num){};
-// void Team9::setHistogramNumClasses(unsigned short num){};
 
 //===
 /*
