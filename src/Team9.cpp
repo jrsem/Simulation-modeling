@@ -85,9 +85,12 @@ unsigned int Team9::numElements()
 double Team9::average()
 {
     if(!_avgReady){
-        double sum = accumulate(std::begin(sample), end(sample), 0.0);
-        _average = sum / _numElements; //data.size;
+        double N = Team9::numElements();
+        for(auto &&item:sample){
+            _average += item/N;
+        }
         cout << "media:" << _average << endl;
+    
         _avgReady = true;
     }
     return _average;
@@ -225,8 +228,9 @@ double Team9::halfWidthConfidenceInterval(double confidencelevel){
 unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
     double z2 = pow(zScore[confidencelevel],2);
     double hW2 = pow(halfWidth,2);
+ 
     _newSampleSize = z2 * Team9::variance() / hW2;
-    
+
     return _newSampleSize;
 };
 
@@ -288,7 +292,7 @@ double Team9::quantile(unsigned short num, unsigned short subsets){
     else{
         _quantile = *pos;
     }
-    cout<<"quantile:"<<_quantile<<endl;
+    //cout<<"quantile:"<<_quantile<<endl;
     return _quantile;
 }
 
@@ -326,11 +330,12 @@ double Team9::getClassAmplitude(){
     
     return _amplitude;
 }
+//Classes do histograma iniciam em 0.
  double Team9::histogramClassLowerLimit(unsigned short classNum){
      if(mapClassLowerLimit.count(classNum)==0){//verifica se já foi calculado antes
          
          
-         _histogramClassLowerLimit = Team9::min() + classNum* Team9::getClassAmplitude();
+         _histogramClassLowerLimit = Team9::min() + (classNum)* Team9::getClassAmplitude();
          mapClassLowerLimit.insert( pair<unsigned short,double>(classNum, _histogramClassLowerLimit) );
           cout << "calculou Lower Limit: " <<_histogramClassLowerLimit <<" da clase " <<classNum<< endl;
   
