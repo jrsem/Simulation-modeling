@@ -35,7 +35,7 @@ void Team9::read_file()
   double convert_Number;
   ifstream myfile;
   try{
-    myfile.open("./data/dataTest.txt");
+    myfile.open("./data/datahuge.txt");
     if (myfile.is_open())
     {
       while (myfile.eof() == false)
@@ -207,12 +207,10 @@ double Team9::variance()
     if(!_varianceReady){
         _variance = 0;
         double avg = average();
-        //duvida : é melhor utiliza mean ou everage?
         for (auto &&item : sample)
         {
-          _variance += (item - avg) * (item - avg);
+          _variance += ((item - avg) * (item - avg)) / (_numElements-1);
         }
-        _variance /= _numElements-1;
         //sd = sqrt(var); //desvio padrão
         cout << "variancia:" << _variance << endl;
         //cout << "desvio padrão" << sd << endl;
