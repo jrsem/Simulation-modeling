@@ -20,16 +20,29 @@
 #include <map>       //map<>
 using namespace std;
 
+/**
+ * @brief Construct a new Team 9:: Team 9 object
+ * 
+ */
 Team9::Team9()
 {
     //Inicializa Tabela com valores de Z.
   populateZCriticalValues();
   
   read_file();
-  //Team9::sortList();
+
+  
   numElements();
 };
 
+/*
+    Iteração é feita no arquivo .txt fornecido, colocando cada valor na lista "sample"
+ */
+
+/**
+ * @brief 
+ * 
+ */
 void Team9::read_file()
 {
   double convert_Number;
@@ -53,7 +66,14 @@ void Team9::read_file()
         throw;
   }
   
-  // NEW SAMPLE, RESET ALL
+/*
+    Atributos são limpos para possibilitar o cálculo de estatísticas para uma nova entrada
+ */
+
+/**
+ * @brief 
+ * 
+ */
   _minReady = false;
   _maxReady = false;
   _avgReady = false;
@@ -73,8 +93,11 @@ void Team9::read_file()
   mapConfidenceHalfWidthCalculated.clear();
 }
 
-
-
+/**
+ * @brief Retorna o número de elementos da lista "sample"
+ * 
+ * @return unsigned int 
+ */
 unsigned int Team9::numElements()
 {
   _numElements = sample.size();
@@ -82,6 +105,12 @@ unsigned int Team9::numElements()
   return _numElements;
 };
 
+/**
+ * @brief Cálculo da média é feito através do incremento de cada valor dividido pela quantidade de itens na lista,
+            fazendo com que a média seja incrementada aos poucos, diminuindo o risco de overflow
+ * 
+ * @return double 
+ */
 double Team9::average()
 {
     if(!_avgReady){
@@ -122,6 +151,14 @@ double Team9::average()
 };
  */
 
+
+/**
+ * @brief Utilização de uma library c++ que itera em cima da lista em busca do maior valor
+            Foi considerao fazermos uma ordenação de lista antes, mas isso iria requerer uma complexidade O(n log n),
+            enquanto a iteração feita tem complexidade O(n)
+ * 
+ * @return double 
+ */
 double Team9::max()
 {
     if(!_maxReady){
@@ -132,6 +169,13 @@ double Team9::max()
     return _max;
 };
 
+/**
+ * @brief Utilização de uma library c++ que itera em cima da lista em busca do menor valor
+            Foi considerao fazermos uma ordenação de lista antes, mas isso iria requerer uma complexidade O(n log n),
+            enquanto a iteração feita tem complexidade O(n)
+ * 
+ * @return double 
+ */
 double Team9::min()
 {
     if(!_minReady){
@@ -142,35 +186,11 @@ double Team9::min()
     return _min;
 };
 
-double Team9::mediane_bkp()
-{
-    if(!_medianeReady){
-        
-        if(!_sampleSorted)
-            Team9::sortList();
-
-        if (fmod(_numElements, 2) == 0)
-        {
-          list<double>::iterator right = next(sample.begin(), ((_numElements / 2)) - 1);
-          list<double>::iterator left = next(sample.begin(), ((_numElements / 2)));
-          cout << "right" << *right << endl;
-          cout << "left" << *left << endl;
-          _mediane = ((*right) + (*left)) / 2;
-          cout << "mediane dois dois:" << _mediane << endl;
-
-        }
-        else
-        {
-          list<double>::iterator center = next(sample.begin(), ((_numElements) / 2));
-          _mediane = *center;
-          cout << "center mediane:" << _mediane << endl;
-
-        }
-        _medianeReady = true;
-    }
-    return _mediane;
-};
-
+/**
+ * @brief Como sugerido pelo professor, para o cálculo da mediana utilizamos o método genérico "quantile"
+ * 
+ * @return double 
+ */
 double Team9::mediane()
 {
     if(!_medianeReady){
@@ -179,6 +199,14 @@ double Team9::mediane()
     }
     return _mediane;
 };
+
+
+/**
+ * @brief Moda: é feita uma iteração por todos os valores de sample, que são inseridos como chave em um dicionário, 
+            e então determinado qual valor apareceu com maior frequencia 
+ * 
+ * @return double 
+ */
 double Team9::mode()
 {
     if(!_modeReady){
@@ -202,6 +230,12 @@ double Team9::mode()
     return _mode;
 };
 
+/**
+ * @brief Para o cálculo da variância, optamos por fazer a divisão a cada iteração ao invés do final,
+            de forma a diminuir o crescimento do somatório
+ * 
+ * @return double 
+ */
 double Team9::variance()
 {
     if(!_varianceReady){
@@ -219,6 +253,12 @@ double Team9::variance()
   return _variance;
 };
 
+
+/**
+ * @brief Cálculo padrão de desvio padrão
+ * 
+ * @return double 
+ */
 double Team9::stddeviation(){
     if(!_stddevReady){
         _stdDeviation = sqrt(Team9::variance());
@@ -228,6 +268,12 @@ double Team9::stddeviation(){
     return _stdDeviation;
 };
 
+
+/**
+ * @brief Cáculo padrão de Coeficiente de Variancia
+ * 
+ * @return double 
+ */
 double Team9::variationCoef(){
     if(!cVReady){
         _variationCoef = Team9::stddeviation()/Team9::average();
@@ -235,6 +281,15 @@ double Team9::variationCoef(){
     }
     return _variationCoef;
 };
+
+
+/**
+ * @brief Para o calculo da margem de erro, é necessário utilizar um nível de confiança disponível para o calculo do z score.
+            O cálculo foi feito utilizando: z * desvio padrao / raiz de n
+ * 
+ * @param confidencelevel 
+ * @return double 
+ */
 double Team9::halfWidthConfidenceInterval(double confidencelevel){
     if(mapConfidenceHalfWidthCalculated[confidencelevel]==0){     
         double z = zScore[confidencelevel];
@@ -249,6 +304,16 @@ double Team9::halfWidthConfidenceInterval(double confidencelevel){
     //cout<<"Z= "<<zScore[confidencelevel]<<endl;
     return _halfWidthConfidenceInterval;
 };
+
+
+/**
+ * @brief Para o calculo do tamanho da amostra, é necessário utilizar um nível de confiança disponível para o calculo do z score.
+            O cálculo foi feito utilizando: z² * variancia / (margem de erro)²
+ * 
+ * @param confidencelevel 
+ * @param halfWidth 
+ * @return unsigned int 
+ */
 unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
     double z2 = pow(zScore[confidencelevel],2);
     double hW2 = pow(halfWidth,2);
@@ -258,6 +323,13 @@ unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
     return _newSampleSize;
 };
 
+
+/**
+ * @brief Quartil utiliza a função generica quantile.
+ * 
+ * @param num 
+ * @return double 
+ */
 double Team9::quartil(unsigned short num){
     if(num<1 || num>3)
      throw invalid_argument("Quartil value must be between 1 and 3.");
@@ -270,6 +342,13 @@ double Team9::quartil(unsigned short num){
        _quartil = mapQuartilCalculated[num]; 
     return _quartil;
 };
+
+/**
+ * @brief Decil utiliza a função generica quantile.
+ * 
+ * @param num 
+ * @return double 
+ */
 double Team9::decil(unsigned short num){
      if(num<1 || num>10)
         throw invalid_argument("Decil value must be between 1 and 10.");
@@ -283,6 +362,13 @@ double Team9::decil(unsigned short num){
     
     return _decil;
 };
+
+/**
+ * @brief Centil utiliza a função generica quantile.
+ * 
+ * @param num 
+ * @return double 
+ */
 double Team9::centil(unsigned short num){
      if(num<1 || num>100)
         throw invalid_argument("Centil value must be between 1 and 100.");
@@ -297,6 +383,14 @@ double Team9::centil(unsigned short num){
     return _centil;
 };
 
+/**
+ * @brief A primeira etapa do método é fazer a ordenação da lista, 
+            pois todos os métodos que utilizam o mesmo precisam se uma lista ordenada para serem calculados.
+ * 
+ * @param num 
+ * @param subsets 
+ * @return double 
+ */
 double Team9::quantile(unsigned short num, unsigned short subsets){
      if(!_sampleSorted)
             Team9::sortList();
@@ -309,7 +403,7 @@ double Team9::quantile(unsigned short num, unsigned short subsets){
     list<double>::iterator pos = next(sample.begin(), integ-1);
     if(fraction > 0){
         //fracionario, fazer interpolacao
-         
+        // caso a quantidade de elementos seja par
          list<double>::iterator posAfter = next(sample.begin(), integ);
          _quantile = (*pos + *posAfter)/2;
     }
@@ -320,12 +414,23 @@ double Team9::quantile(unsigned short num, unsigned short subsets){
     return _quantile;
 }
 
+/**
+ * @brief Setter
+ * 
+ * @param num 
+ */
 void Team9::setHistogramNumClasses(unsigned short num){
     _histogramNumClasses = num;
     //Novo numero de classes setado, valores calculador anteriormente não servem mais.
     mapClassLowerLimit.clear();
     _amplitudeReady = false;
 };
+
+/**
+ * @brief Getter, mas levasse em consideração o numero de elementos
+ * 
+ * @return unsigned short 
+ */
 unsigned short Team9::histogramNumClasses(){
      if(!_histoNumClassesReady){
          double n = Team9::numElements();
@@ -338,8 +443,12 @@ unsigned short Team9::histogramNumClasses(){
     }
     return _histogramNumClasses;
 };
-// 
 
+/**
+ * @brief Para o cálculo da amplitude foi usada a equação: (Valor maximo - Valor minimo) / numero de classes
+ * 
+ * @return double 
+ */
 double Team9::getClassAmplitude(){
     if(!_amplitudeReady){
         if(_histogramNumClasses==0)
@@ -354,7 +463,15 @@ double Team9::getClassAmplitude(){
     
     return _amplitude;
 }
-//Classes do histograma iniciam em 0.
+
+
+/**
+ * @brief O limite inferior é determinado com um deslocamento baseado no valor minimo + a amplitude da classe, vezes o numero da classe desejada.
+ *          Classes do histograma iniciam em 0.
+ * 
+ * @param classNum 
+ * @return double 
+ */
  double Team9::histogramClassLowerLimit(unsigned short classNum){
      if(mapClassLowerLimit.count(classNum)==0){//verifica se já foi calculado antes
          
@@ -370,6 +487,13 @@ double Team9::getClassAmplitude(){
      }
        return _histogramClassLowerLimit;
  };
+
+/**
+ * @brief 
+ * 
+ * @param classNum 
+ * @return unsigned int 
+ */
 unsigned int Team9::histogramClassFrequency(unsigned short classNum){
      if(mapClassFrequency.count(classNum)==0){//verifica se já foi calculado antes
          double lowerLimit = Team9::histogramClassLowerLimit(classNum);
@@ -390,6 +514,12 @@ unsigned int Team9::histogramClassFrequency(unsigned short classNum){
      }
      return _histogramClassFrequency;
 };
+
+
+/**
+ * @brief Método para verificação dos itens da lista
+ * 
+ */
 void Team9::showlist()
 {
   for (auto &&item : sample)
@@ -398,11 +528,20 @@ void Team9::showlist()
 };
 
 
+/**
+ * @brief Método de ordenação
+ * 
+ */
 void Team9::sortList()
 {
   sample.sort();
 };
 
+
+/**
+ * @brief Mapeamento de zScore
+ * 
+ */
 void Team9::populateZCriticalValues(){
     zScore.insert( pair<double, double>(0.70, 1.04) );
     zScore.insert( pair<double, double>(0.75, 1.15) );
