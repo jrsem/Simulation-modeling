@@ -96,6 +96,32 @@ double Team9::average()
     return _average;
 };
 
+/*
+https://www.quora.com/How-can-I-compute-the-average-of-a-large-array-of-integers-without-running-into-overflow
+double Team9::average()
+{
+    if(!_avgReady){
+        int size = sample.size();
+        int x = 0;
+        int y = 0;
+        for(int i : sample) {
+            x += i / size;
+            int b = i % size;
+            if (y >= size - b) {
+                x++;
+                y -= size - b;
+            } else {
+                y += b;
+            }
+        }
+
+        cout << "media:" << x << endl;
+        _avgReady = true;
+    }
+    return _average;
+};
+ */
+
 double Team9::max()
 {
     if(!_maxReady){
