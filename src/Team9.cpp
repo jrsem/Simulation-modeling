@@ -8,7 +8,7 @@
  * File:   Team9.cpp
  * Author: LENOVO
  * 
- * Created on 21 de Junho de 2019, 16:21
+ * Created on 13 de Junho de 2019, 16:21
  */
 
 #include "Team9.h"
@@ -24,31 +24,30 @@ using namespace std;
  * @brief Construct a new Team 9:: Team 9 object
  * 
  */
-Team9::Team9()
+Team9::Team9(string path)
 {
-    //Inicializa Tabela com valores de Z.
+    //Initialize Table with z values.
   populateZCriticalValues();
   
-  read_file();
+  read_file(path);
 
-  
   numElements();
 };
 
 /*
-    Iteração é feita no arquivo .txt fornecido, colocando cada valor na lista "sample"
+    Iteration is made through file .txt provided, which values are inserted in sample list
  */
 
 /**
  * @brief 
  * 
  */
-void Team9::read_file()
+void Team9::read_file(string path)
 {
   double convert_Number;
   ifstream myfile;
   try{
-    myfile.open("./data/datahuge.txt");
+    myfile.open(path);
     if (myfile.is_open())
     {
       while (myfile.eof() == false)
@@ -67,7 +66,7 @@ void Team9::read_file()
   }
   
 /*
-    Atributos são limpos para possibilitar o cálculo de estatísticas para uma nova entrada
+    Attributed are cleared so new calculate is possible for new file
  */
 
 /**
@@ -94,20 +93,20 @@ void Team9::read_file()
 }
 
 /**
- * @brief Retorna o número de elementos da lista "sample"
+ * @brief Return number of elements in "sample"
  * 
  * @return unsigned int 
  */
 unsigned int Team9::numElements()
 {
   _numElements = sample.size();
-  cout << "data size:" << _numElements << endl;
+  // cout << "data size:" << _numElements << endl;
   return _numElements;
 };
 
 /**
- * @brief Cálculo da média é feito através do incremento de cada valor dividido pela quantidade de itens na lista,
-            fazendo com que a média seja incrementada aos poucos, diminuindo o risco de overflow
+ * @brief The average is made through the increment of each value divided by the number of elements in list,
+ * making the average to be increment little by little, making the risk of overflow shorter
  * 
  * @return double 
  */
@@ -118,7 +117,6 @@ double Team9::average()
         for(auto &&item:sample){
             _average += item/N;
         }
-        cout << "media:" << _average << endl;
     
         _avgReady = true;
     }
@@ -126,6 +124,7 @@ double Team9::average()
 };
 
 /*
+We left this here because we found a possible better way to calculate the average, but we can't really understand the equation being used.
 https://www.quora.com/How-can-I-compute-the-average-of-a-large-array-of-integers-without-running-into-overflow
 double Team9::average()
 {
@@ -163,7 +162,6 @@ double Team9::max()
 {
     if(!_maxReady){
         _max = *max_element(sample.begin(), sample.end());
-        cout << "max:" << _max << endl;
         _maxReady = true;
     }
     return _max;
@@ -180,7 +178,6 @@ double Team9::min()
 {
     if(!_minReady){
         _min = *min_element(sample.begin(), sample.end());
-        cout << "min:" << _min << endl;
         _minReady = true;
     }
     return _min;
@@ -223,7 +220,6 @@ double Team9::mode()
           }
         }
         //TODO pode ter mais de um mode ou seja 2 ou mais numero com mesma frequencia
-        cout << "more freqent:" << itm << endl;
         _mode = itm;
         _modeReady = true;
     }
@@ -246,7 +242,7 @@ double Team9::variance()
           _variance += ((item - avg) * (item - avg)) / (_numElements-1);
         }
         //sd = sqrt(var); //desvio padrão
-        cout << "variancia:" << _variance << endl;
+        
         //cout << "desvio padrão" << sd << endl;
         _varianceReady = true;
     }
@@ -473,17 +469,15 @@ double Team9::getClassAmplitude(){
  * @return double 
  */
  double Team9::histogramClassLowerLimit(unsigned short classNum){
-     if(mapClassLowerLimit.count(classNum)==0){//verifica se já foi calculado antes
-         
-         
+     if(mapClassLowerLimit.count(classNum)==0){//verifica se já foi calculado antes         
          _histogramClassLowerLimit = Team9::min() + (classNum)* Team9::getClassAmplitude();
          mapClassLowerLimit.insert( pair<unsigned short,double>(classNum, _histogramClassLowerLimit) );
-          cout << "calculou Lower Limit: " <<_histogramClassLowerLimit <<" da clase " <<classNum<< endl;
+          cout << "calculou Lower Limit: " <<_histogramClassLowerLimit <<" da classe " << classNum<< endl;
   
      }
      else{
          _histogramClassLowerLimit = mapClassLowerLimit[classNum];
-         cout << "recuperou Lower Limit: " <<_histogramClassLowerLimit <<" da clase " <<classNum<< endl;
+         cout << "recuperou Lower Limit: " <<_histogramClassLowerLimit <<" da classe " << classNum<< endl;
      }
        return _histogramClassLowerLimit;
  };

@@ -46,7 +46,7 @@ private:
   bool _amplitudeReady = false;
 
 public:
-  Team9();
+  Team9(string path);
   double average();
   double centil(unsigned short num);
   double decil(unsigned short num);
@@ -81,6 +81,6 @@ public:
   void sortList();
   unsigned int numElements();
   void showlist();
-  void read_file();
+  void read_file(string path);
   //===
 };
