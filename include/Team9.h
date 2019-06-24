@@ -31,7 +31,6 @@ private:
   double _histogramClassLowerLimit;
   double _amplitude;
   unsigned int _histogramClassFrequency;
-  //double
   bool _minReady = false;
   bool _maxReady = false;
   bool _avgReady = false;

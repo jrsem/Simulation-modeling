@@ -6,14 +6,15 @@
 
 /* 
  * File:   Team9.cpp
- * Author: LENOVO
+ * Authors: Junior Semerzier (13106344)
+ *          Marcelo José Dias (15205398)
+ *          Thomas Fernandes Feijoo (12200662)
  * 
  * Created on 13 de Junho de 2019, 16:21
  */
 
 #include "Team9.h"
 
-//#include "Team-9.h"
 #include <numeric>   //accumulate()
 #include <algorithm> //max_element()
 #include <math.h>    //fmod()
