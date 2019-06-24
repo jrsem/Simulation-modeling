@@ -16,7 +16,7 @@ private:
   double _average;
   double _max;
   double _min;
-  double _mediane;
+  double _median;
   double _mode;
   double _variance;
   double _stdDeviation;
@@ -35,7 +35,7 @@ private:
   bool _minReady = false;
   bool _maxReady = false;
   bool _avgReady = false;
-  bool _medianeReady = false;
+  bool _medianReady = false;
   bool _modeReady = false;
   bool _sampleSorted = false;
   bool _stddevReady = false;
@@ -55,8 +55,7 @@ public:
   double histogramClassLowerLimit(unsigned short classNum);
   unsigned short histogramNumClasses();
   double max();
-  double mediane();
-  double mediane_bkp();
+  double median();
   double min();
   double mode();
   unsigned int newSampleSize(double confidencelevel, double halfWidth);

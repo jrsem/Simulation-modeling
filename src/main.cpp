@@ -4,11 +4,11 @@ using namespace std;
 int main()
 {
 	Team9 *team9 = new Team9("./data/datahuge.txt");
-  cout<<"Main Test"<<endl;
+  cout<<"Main Program"<<endl;
 	cout << "media: " << fixed << team9->average() << endl;
 	cout << "max: " << team9->max() << endl;
 	cout << "min: " << team9->min() << endl; 
-	cout << "mediane: " << team9->mediane() << endl; 
+	cout << "median: " << team9->median() << endl; 
   cout << "quartil 3: "<< team9->quartil(3) <<endl;
   cout << "centil 25: "<< team9->centil(25) <<endl;
   cout << "decil 2: "<< team9->decil(2) <<endl;

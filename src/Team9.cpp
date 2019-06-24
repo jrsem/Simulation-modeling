@@ -64,19 +64,15 @@ void Team9::read_file(string path)
         cout << "Error nro "<<e<<endl;
         throw;
   }
-  
-/*
-    Attributed are cleared so new calculate is possible for new file
- */
 
 /**
- * @brief 
+ * @brief Attributes are cleared so a new calculation is possible for a new file
  * 
  */
   _minReady = false;
   _maxReady = false;
   _avgReady = false;
-  _medianeReady = false;
+  _medianReady = false;
   _modeReady = false;
   _sampleSorted = false;
   _stddevReady = false;
@@ -86,6 +82,7 @@ void Team9::read_file(string path)
   histoCLLReady = false;
   
   mapClassLowerLimit.clear();
+  mapClassFrequency.clear();
   mapQuartilCalculated.clear();
   mapDecilCalculated.clear();
   mapCentilCalculated.clear();
@@ -152,10 +149,9 @@ double Team9::average()
 
 
 /**
- * @brief Utilização de uma library c++ que itera em cima da lista em busca do maior valor
-            Foi considerao fazermos uma ordenação de lista antes, mas isso iria requerer uma complexidade O(n log n),
-            enquanto a iteração feita tem complexidade O(n)
- * 
+ * @brief We utilize an c++ library that iterate through a list searching for the biggest value.
+ *          We considered using an ordenation of the list before, but that would require an O(n log n) complexity,
+ *          while an interation made by max_element is O(n)
  * @return double 
  */
 double Team9::max()
@@ -168,9 +164,9 @@ double Team9::max()
 };
 
 /**
- * @brief Utilização de uma library c++ que itera em cima da lista em busca do menor valor
-            Foi considerao fazermos uma ordenação de lista antes, mas isso iria requerer uma complexidade O(n log n),
-            enquanto a iteração feita tem complexidade O(n)
+ * @brief We utilize an c++ library that iterate through a list searching for the lowest value.
+ *          We considered using an ordenation of the list before, but that would require an O(n log n) complexity,
+ *          while an interation made by max_element is O(n)
  * 
  * @return double 
  */
@@ -184,24 +180,23 @@ double Team9::min()
 };
 
 /**
- * @brief Como sugerido pelo professor, para o cálculo da mediana utilizamos o método genérico "quantile"
+ * @brief Median, quartil, decil and centil share the same implementation, the only diffence is the quantity of subsets.
  * 
  * @return double 
  */
-double Team9::mediane()
+double Team9::median()
 {
-    if(!_medianeReady){
-        _mediane = Team9::quantile(1,2);
-        _medianeReady = true;
+    if(!_medianReady){
+        _median = Team9::quantile(1,2);
+        _medianReady = true;
     }
-    return _mediane;
+    return _median;
 };
 
 
 /**
- * @brief Moda: é feita uma iteração por todos os valores de sample, que são inseridos como chave em um dicionário, 
-            e então determinado qual valor apareceu com maior frequencia 
- * 
+ * @brief Mode: an iteration is made through the sample, which values are added to a dictionary and added. 
+ * The one which appeared for the most time, returns;
  * @return double 
  */
 double Team9::mode()
@@ -227,8 +222,8 @@ double Team9::mode()
 };
 
 /**
- * @brief Para o cálculo da variância, optamos por fazer a divisão a cada iteração ao invés do final,
-            de forma a diminuir o crescimento do somatório
+ * @brief To determine the variance, we decide to make a division after each iteration instead of making in the end.
+ *         By making this, we reduce the growth of the sum.
  * 
  * @return double 
  */
@@ -241,9 +236,6 @@ double Team9::variance()
         {
           _variance += ((item - avg) * (item - avg)) / (_numElements-1);
         }
-        //sd = sqrt(var); //desvio padrão
-        
-        //cout << "desvio padrão" << sd << endl;
         _varianceReady = true;
     }
   return _variance;
@@ -251,7 +243,7 @@ double Team9::variance()
 
 
 /**
- * @brief Cálculo padrão de desvio padrão
+ * @brief Standart calculation of std deviation.
  * 
  * @return double 
  */
@@ -266,7 +258,7 @@ double Team9::stddeviation(){
 
 
 /**
- * @brief Cáculo padrão de Coeficiente de Variancia
+ * @brief Standart calculation of variation coeficient.
  * 
  * @return double 
  */
@@ -280,8 +272,9 @@ double Team9::variationCoef(){
 
 
 /**
- * @brief Para o calculo da margem de erro, é necessário utilizar um nível de confiança disponível para o calculo do z score.
-            O cálculo foi feito utilizando: z * desvio padrao / raiz de n
+ * @brief To calculate the half width conficende interval, it's necessary to use an confidence level available to grab the z score.
+ *      The equation used was: z * stddeviation / sqrt(n)
+ * 
  * 
  * @param confidencelevel 
  * @return double 
@@ -303,8 +296,8 @@ double Team9::halfWidthConfidenceInterval(double confidencelevel){
 
 
 /**
- * @brief Para o calculo do tamanho da amostra, é necessário utilizar um nível de confiança disponível para o calculo do z score.
-            O cálculo foi feito utilizando: z² * variancia / (margem de erro)²
+ * @brief  To calculate the sample size, it's necessary to use an confidence level available to grab the z score.
+ *          The equation used was: z² * variance / half_width²
  * 
  * @param confidencelevel 
  * @param halfWidth 
@@ -321,7 +314,7 @@ unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
 
 
 /**
- * @brief Quartil utiliza a função generica quantile.
+ * @brief Median, quartil, decil and centil share the same implementation, the only diffence is the quantity of subsets.
  * 
  * @param num 
  * @return double 
@@ -329,7 +322,7 @@ unsigned int Team9::newSampleSize(double confidencelevel, double halfWidth){
 double Team9::quartil(unsigned short num){
     if(num<1 || num>3)
      throw invalid_argument("Quartil value must be between 1 and 3.");
-    //verifica se ja foi calculado, se não, insere no map.
+    // check if it was already calculated, if not, insert in map.
     if(mapQuartilCalculated[num]==0){
         _quartil = Team9::quantile(num, 4);
         mapQuartilCalculated.insert(pair<unsigned short, double>(num, _quartil));
@@ -340,7 +333,7 @@ double Team9::quartil(unsigned short num){
 };
 
 /**
- * @brief Decil utiliza a função generica quantile.
+ * @brief Median, quartil, decil and centil share the same implementation, the only diffence is the quantity of subsets.
  * 
  * @param num 
  * @return double 
@@ -348,7 +341,7 @@ double Team9::quartil(unsigned short num){
 double Team9::decil(unsigned short num){
      if(num<1 || num>10)
         throw invalid_argument("Decil value must be between 1 and 10.");
-     //verifica se ja foi calculado, se não, insere no map.
+     // check if it was already calculated, if not, insert in map.
     if(mapDecilCalculated[num]==0){
         _decil = Team9::quantile(num, 10);
         mapDecilCalculated.insert(pair<unsigned short, double>(num, _decil));
@@ -360,7 +353,7 @@ double Team9::decil(unsigned short num){
 };
 
 /**
- * @brief Centil utiliza a função generica quantile.
+ * @brief Median, quartil, decil and centil share the same implementation, the only diffence is the quantity of subsets.
  * 
  * @param num 
  * @return double 
@@ -368,7 +361,7 @@ double Team9::decil(unsigned short num){
 double Team9::centil(unsigned short num){
      if(num<1 || num>100)
         throw invalid_argument("Centil value must be between 1 and 100.");
-     //verifica se ja foi calculado, se não, insere no map.
+     // check if it was already calculated, if not, insert in map.
     if(mapCentilCalculated[num]==0){
         _centil = Team9::quantile(num, 100);
         mapCentilCalculated.insert(pair<unsigned short, double>(num, _centil));
@@ -380,9 +373,9 @@ double Team9::centil(unsigned short num){
 };
 
 /**
- * @brief A primeira etapa do método é fazer a ordenação da lista, 
-            pois todos os métodos que utilizam o mesmo precisam se uma lista ordenada para serem calculados.
- * 
+ * @brief * The first part is ordenate the list, because every method that calls this one, require an ordered list.
+ * Then is basically devide the list in subsets and grab the last position of it.
+ * If the number of total elements is even, there's the need of a division of the two central values
  * @param num 
  * @param subsets 
  * @return double 
@@ -398,8 +391,6 @@ double Team9::quantile(unsigned short num, unsigned short subsets){
     fraction = modf(position, &integ);
     list<double>::iterator pos = next(sample.begin(), integ-1);
     if(fraction > 0){
-        //fracionario, fazer interpolacao
-        // caso a quantidade de elementos seja par
          list<double>::iterator posAfter = next(sample.begin(), integ);
          _quantile = (*pos + *posAfter)/2;
     }
@@ -417,14 +408,14 @@ double Team9::quantile(unsigned short num, unsigned short subsets){
  */
 void Team9::setHistogramNumClasses(unsigned short num){
     _histogramNumClasses = num;
-    //Novo numero de classes setado, valores calculador anteriormente não servem mais.
+    //New value of classes set, old values calculated are trash.
     mapClassLowerLimit.clear();
+    mapClassFrequency.clear();
     _amplitudeReady = false;
 };
 
 /**
- * @brief Getter, mas levasse em consideração o numero de elementos
- * 
+ * @brief Getter, but we take in consideration the number of elements
  * @return unsigned short 
  */
 unsigned short Team9::histogramNumClasses(){
@@ -441,7 +432,7 @@ unsigned short Team9::histogramNumClasses(){
 };
 
 /**
- * @brief Para o cálculo da amplitude foi usada a equação: (Valor maximo - Valor minimo) / numero de classes
+ * @brief The equation used is: (Max value - Min value) / classes number
  * 
  * @return double 
  */
@@ -462,8 +453,8 @@ double Team9::getClassAmplitude(){
 
 
 /**
- * @brief O limite inferior é determinado com um deslocamento baseado no valor minimo + a amplitude da classe, vezes o numero da classe desejada.
- *          Classes do histograma iniciam em 0.
+ * @brief Class lower limit is determined by making the lowest number in sample PLUS class amplitude, MULTIPLIED BY the number of the desired class.
+ *  Histogram classes begin in zero
  * 
  * @param classNum 
  * @return double 
@@ -511,7 +502,7 @@ unsigned int Team9::histogramClassFrequency(unsigned short classNum){
 
 
 /**
- * @brief Método para verificação dos itens da lista
+ * @brief Just to check elements were loaded correctly from file to list
  * 
  */
 void Team9::showlist()
@@ -523,7 +514,7 @@ void Team9::showlist()
 
 
 /**
- * @brief Método de ordenação
+ * @brief Ordenation method
  * 
  */
 void Team9::sortList()
@@ -533,7 +524,7 @@ void Team9::sortList()
 
 
 /**
- * @brief Mapeamento de zScore
+ * @brief Zscore mapping
  * 
  */
 void Team9::populateZCriticalValues(){

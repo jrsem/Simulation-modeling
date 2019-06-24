@@ -11,7 +11,7 @@ int main()
 	assert(team9->average() >= 5000325.942097 && team9->average() <= 5000325.942098);
 	assert(team9->max() == 7145890);
 	assert(team9->min() == 2859480);
-	assert(team9->mediane() == 5000300);
+	assert(team9->median() == 5000300);
 	assert(team9->quartil(3) == 5337270);
 	assert(team9->centil(25) == 4662920);
 	assert(team9->decil(2) == 4579680);
